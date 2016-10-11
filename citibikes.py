@@ -91,6 +91,17 @@ def main_acquire_for_1hr():
 
 '''DATA ANALYSIS'''
 
+def get_reference_for_station(station_id):
+    '''Get reference info for a specific station and return a DataFrame with information'''
+    con = lite.connect(db_name)
+    cur = con.cursor()
+    with con:
+        cur.execute('SELECT * FROM citibike_reference WHERE id={0}'.format(station_id))
+        cols = [desc[0] for desc in cur.description]
+        df_ref = pd.DataFrame(cur.fetchall(), columns=cols)
+    return df_ref
+
+
 def sql_to_DataFrame():
     '''create a DataFrame with previously acquired data stored in database'''
     con = lite.connect(db_name)
@@ -108,11 +119,14 @@ def sql_to_DataFrame():
     
     most_active_station = activity.idxmax()
     most_active_station_activity = int(activity[most_active_station])
+    df_ref = get_reference_for_station(most_active_station[1:])
+    print(df_ref.info())
     
     initial_time = int(df.index[0]) + 5*60*60 # because epoch time is at gmt 0 and time of acquisition was at gmt -5
     initial_time = datetime.datetime.fromtimestamp(initial_time) #+ datetime.datetime(1970, 1, 1)
     finish_time = int(df.index[-1]) + 5*60*60
     finish_time = datetime.datetime.fromtimestamp(finish_time)
+    
     print('\nOn {0}, from {1} to {2}, the most active station was station {3} with a total activity of {4}.\n\
 \nNote: activity is defined as the sum of the absolute value of the variation of the number of available bikes \
 every minute for an hour.'.format(
