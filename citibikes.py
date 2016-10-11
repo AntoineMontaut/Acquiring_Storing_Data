@@ -120,18 +120,23 @@ def sql_to_DataFrame():
     most_active_station = activity.idxmax()
     most_active_station_activity = int(activity[most_active_station])
     df_ref = get_reference_for_station(most_active_station[1:])
-    print(df_ref.info())
+    # print(df_ref)
+    df_ref_series = pd.Series(df_ref.loc[0].values, index=df_ref.columns.values)
+    print(df_ref_series)
     
     initial_time = int(df.index[0]) + 5*60*60 # because epoch time is at gmt 0 and time of acquisition was at gmt -5
     initial_time = datetime.datetime.fromtimestamp(initial_time) #+ datetime.datetime(1970, 1, 1)
     finish_time = int(df.index[-1]) + 5*60*60
     finish_time = datetime.datetime.fromtimestamp(finish_time)
     
-    print('\nOn {0}, from {1} to {2}, the most active station was station {3} with a total activity of {4}.\n\
-\nNote: activity is defined as the sum of the absolute value of the variation of the number of available bikes \
-every minute for an hour.'.format(
+    print('\nOn {0}, from {1} to {2}, the most active station was station {3} with a total activity of {4}.'.format(
     initial_time.strftime('%m-%d-%Y'), initial_time.strftime('%H:%M:%S'), finish_time.strftime('%H:%M:%S'),
     most_active_station[1:], most_active_station_activity))
+    print('Station {0} is located at {1} (longitude {2} and latitude {3}).'.format(
+    most_active_station[1:], df_ref_series['stationName'], df_ref_series['longitude'], df_ref_series['latitude']))
+    
+    print('\nNote: activity is defined as the sum of the absolute value of the variation of the number of available bikes \
+every minute for an hour (i.e. number of bikes in and out, both counted positively).')
     
     
     
