@@ -164,12 +164,13 @@ def get_date_and_save_in_db():
         
     with con:
         time_temp = (exec_time - datetime.datetime(1970, 1, 1)).total_seconds()
-        cur.execute('INSERT INTO available_bikes (execution_time) VALUES (?)', 
-        (time_temp,))
+        # cur.execute('INSERT INTO available_bikes (execution_time) VALUES (?)', 
+        # (time_temp,))
+        cur.execute('INSERT INTO available_bikes (execution_time) VALUES ({0});'.format(int(time_temp)))
         
         # cur.execute('SELECT execution_time FROM available_bikes')
         
         for k, v in id_bikes.iteritems():
             cur.execute('UPDATE available_bikes SET _' + str(k) + '=' + str(v) + ' WHERE execution_time = ' + str(time_temp) + ';')
         
-# get_date_and_save_in_db()
+get_date_and_save_in_db()
