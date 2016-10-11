@@ -10,6 +10,7 @@ from dateutil.parser import parse
 import collections
 import time
 import pandas as pd
+import matplotlib.pyplot as plt
 
 url = 'http://www.citibikenyc.com/stations/json'
 db_name = 'citi_bike.db'
@@ -122,7 +123,7 @@ def sql_to_DataFrame():
     df_ref = get_reference_for_station(most_active_station[1:])
     # print(df_ref)
     df_ref_series = pd.Series(df_ref.loc[0].values, index=df_ref.columns.values)
-    print(df_ref_series)
+    # print(df_ref_series)
     
     initial_time = int(df.index[0]) + 5*60*60 # because epoch time is at gmt 0 and time of acquisition was at gmt -5
     initial_time = datetime.datetime.fromtimestamp(initial_time) #+ datetime.datetime(1970, 1, 1)
@@ -137,8 +138,11 @@ def sql_to_DataFrame():
     
     print('\nNote: activity is defined as the sum of the absolute value of the variation of the number of available bikes \
 every minute for an hour (i.e. number of bikes in and out, both counted positively).')
-    
-    
+
+    def bar_plot_verification():
+        activity.plot(kind='bar')
+        plt.show()
+    # bar_plot_verification #doesn't really make sense to plot all this data, it just makes a very dense plot impossible to read...
     
     
 def main_data_analysis():
