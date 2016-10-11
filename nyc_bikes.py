@@ -66,7 +66,7 @@ def test_timer():
 def main():
     '''main'''
     #CAUTION: clean_table() will erase all rows in the db!
-    clean_table(db_name, table_name) 
+    # clean_table(db_name, table_name) 
     
     print('Data acquisition starting...')
     entry = 0
@@ -78,9 +78,10 @@ def main():
         get_and_store_data()
         processing_time = time.time() - start
         time.sleep(60 - processing_time)
+    print('End of data acquisition')
     
     
     
-main()
+# main()
 # select_data()
 # test_timer()
