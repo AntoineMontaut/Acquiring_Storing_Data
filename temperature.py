@@ -114,7 +114,7 @@ def explore_data(con, cur):
     cities_list = cities.keys()
     cities_list.sort()
     
-    fig = plt.figure('Range of maximum temperatures over the past 30 days')
+    fig = plt.figure('Histogram of maximum daily temperature over the 30 days preceding October 13th of 2016')
     for index in xrange(6):
         plt.subplot(2,3,index+1)
         plt.hist(df[cities_list[index]])
@@ -122,21 +122,21 @@ def explore_data(con, cur):
         mean_max_T = round(df[cities_list[index]].mean(),1)
         median_max_T = round(df[cities_list[index]].median(),1)
         plt.title('{0} (mean={1}F, median={2}F)'.format(cities_list[index], str(mean_max_T), str(median_max_T)))
-    fig = plt.figure('Bar plot for maximum temperature over the past 30 days')
+    fig = plt.figure('Maximum temperature over the past 30 days preceding October 13th of 2016')
     for index in xrange(6):
         plt.subplot(2,3,index+1)
         days = [i for i in xrange(30)]
         plt.plot(days, df[cities_list[index]])
         plt.ylim([50, 100])
-        plt.xlabel('# of days in the past')
+        plt.xlabel('# of days before October 13th of 2016')
         mean_max_T = round(df[cities_list[index]].mean(),1)
         median_max_T = round(df[cities_list[index]].median(),1)
         plt.title('{0} (mean={1}F, median={2}F)'.format(cities_list[index], str(mean_max_T), str(median_max_T)))
         plt.gca().invert_xaxis()
-    # plt.show()
+    plt.show()
     
     range_T = {}
-    print('Overall temperature amplitude over the past month:')
+    print('Overall temperature amplitude over the 30 days preceding October 13th of 2016:')
     for city in cities_list:
         range_T[city] = df[city].max() - df[city].min()
         print('\t-{0}: {1}F.'.format(
@@ -146,7 +146,7 @@ def explore_data(con, cur):
     daily_T_variation_max = daily_T_variation.max()
     # print(df.head())
     # print(daily_T_variation.head())
-    print('\nMaximum temperature variation from one day to the next over the past month:')
+    print('\nMaximum temperature variation from one day to the next over the 30 days preceding October 13th of 2016:')
     for city in cities_list:
         print('\t-{0}: {1}F.'.format(
         city, daily_T_variation[city].max()))
