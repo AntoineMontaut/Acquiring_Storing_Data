@@ -4,12 +4,13 @@ import pandas as pd
 import requests
 import datetime
 import sqlite3 as lite
+import matplotlib.pyplot as plt
 
 cities = {"Austin": ['30.303936', '-97.754355'],
              "Chicago": ['41.837551', '-87.681844'],
              "Denver": ['39.761850', '-104.881105'],
-             "New York": ['40.663619', '-73.938589'],
-             "San Francisco": ['37.727239', '-123.032229'],
+             "New_York": ['40.663619', '-73.938589'],
+             "San_Francisco": ['37.727239', '-123.032229'],
              "Seattle": ['47.620499', '-122.350876']}
              
 dark_sky_key = '0a8ab052a6eac4bda7f97a4499e72166'
@@ -72,7 +73,7 @@ def create_weather_table():
     cur = con.cursor()
     with con:
         cur.execute('CREATE TABLE temperature_max (day INT PRIMARY KEY,\
-Austin FLOAT, Chicago FLOAT, Denver FLOAT, New_York FLOAT, San_Fransisco FLOAT, Seattle FLOAT)')
+Austin FLOAT, Chicago FLOAT, Denver FLOAT, New_York FLOAT, San_Francisco FLOAT, Seattle FLOAT)')
     
     
 def test_weather_table(con, cur):
@@ -100,12 +101,58 @@ def get_temperature_max_from_last_30_days(con, cur):
             r = requests.get(create_request_url(city, format_time(request_time))).json()
             max_temp[city] = r['daily']['data'][0]['temperatureMax']
         with con:
-            cur.execute('INSERT INTO temperature_max (day, Austin, Chicago, Denver, New_York, San_Fransisco, Seattle) \
+            cur.execute('INSERT INTO temperature_max (day, Austin, Chicago, Denver, New_York, San_Francisco, Seattle) \
             VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})'.format(
-            time_key, max_temp['Austin'], max_temp['Chicago'], max_temp['Denver'], max_temp['New York'], 
-            max_temp['San Francisco'], max_temp['Seattle']))
+            time_key, max_temp['Austin'], max_temp['Chicago'], max_temp['Denver'], max_temp['New_York'], 
+            max_temp['San_Francisco'], max_temp['Seattle']))
     
     
+def explore_data(con, cur):
+    df = pd.read_sql_query('SELECT * FROM temperature_max ORDER BY day DESC;',
+    con, index_col='day')
+    # print(df.head())
+    cities_list = cities.keys()
+    cities_list.sort()
+    
+    fig = plt.figure('Range of maximum temperatures over the past 30 days')
+    for index in xrange(6):
+        plt.subplot(2,3,index+1)
+        plt.hist(df[cities_list[index]])
+        plt.xlim([50, 100])
+        mean_max_T = round(df[cities_list[index]].mean(),1)
+        median_max_T = round(df[cities_list[index]].median(),1)
+        plt.title('{0} (mean={1}F, median={2}F)'.format(cities_list[index], str(mean_max_T), str(median_max_T)))
+    fig = plt.figure('Bar plot for maximum temperature over the past 30 days')
+    for index in xrange(6):
+        plt.subplot(2,3,index+1)
+        days = [i for i in xrange(30)]
+        plt.plot(days, df[cities_list[index]])
+        plt.ylim([50, 100])
+        plt.xlabel('# of days in the past')
+        mean_max_T = round(df[cities_list[index]].mean(),1)
+        median_max_T = round(df[cities_list[index]].median(),1)
+        plt.title('{0} (mean={1}F, median={2}F)'.format(cities_list[index], str(mean_max_T), str(median_max_T)))
+        plt.gca().invert_xaxis()
+    # plt.show()
+    
+    range_T = {}
+    print('Overall temperature amplitude over the past month:')
+    for city in cities_list:
+        range_T[city] = df[city].max() - df[city].min()
+        print('\t-{0}: {1}F.'.format(
+        city, round(range_T[city], 1)))
+        
+    daily_T_variation = abs(df - df.shift(-1))
+    daily_T_variation_max = daily_T_variation.max()
+    # print(df.head())
+    # print(daily_T_variation.head())
+    print('\nMaximum temperature variation from one day to the next over the past month:')
+    for city in cities_list:
+        print('\t-{0}: {1}F.'.format(
+        city, daily_T_variation[city].max()))
+    print('\nThe city with the highest temperature variation from one day to the next over the past month is {0} with\
+ a variation of {1}F.'.format(daily_T_variation_max.idxmax(), daily_T_variation_max[daily_T_variation_max.idxmax()]))
+        
     
 def main():
     # data_structure()
@@ -115,6 +162,9 @@ def main():
     # test_weather_table(con, cur)
     # clean_table(con, cur, 'temperature_max')
     # get_temperature_max_from_last_30_days(con, cur)
+    explore_data(con, cur)
+    
+    con.close()
     
     
 main()
