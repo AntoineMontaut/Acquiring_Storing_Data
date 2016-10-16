@@ -7,6 +7,7 @@ import numpy as np
 from HTMLParser import HTMLParser
 import sqlite3 as lite
 import matplotlib.pyplot as plt
+import numpy as np
 
 def explore_soup(soup):
     # print(type(soup))
@@ -160,8 +161,28 @@ def compare_sle_gdp(df, df_gdp):
             df.gdp.loc[i] = float(df_gdp[df_gdp['Country Name'] == df.Country.loc[i]][str(df.Year.loc[i])].values)
         except:
             df.gdp.loc[i] = 'NaN'
-    print(df)
+    df = df[df.gdp != 'NaN']
+    df.dropna(inplace=True)
+    df.gdp = df.gdp.astype('float')
+    print(df.info())
+    df['gdp_log'] = np.log10(df.gdp)
+    
+    i = 0
+    fig = plt.figure('School life expectancy vs. GDP')
+    colors = {'Men': 'b', 'Women': 'g', 'Total': 'r'}
+    for cat in ['Men', 'Women', 'Total']:
+        i += 1
+        plt.subplot(2,2,i)
+        plt.scatter(df.gdp_log, df[cat], c=colors[cat], alpha=.7)
+        plt.ylim([0, 25])
+        plt.xlabel('log10(GDP)')
+        if cat != 'Total':
+            plt.ylabel('Scholl life expectancy for {0} (years)'.format(cat.lower()))
+        else:
+            plt.ylabel('Scholl life expectancy for men + women (years)')
 
+        
+    plt.show()
     
 def main():
     url = 'http://web.archive.org/web/20110514112442/http://unstats.un.org/unsd/demographic/products/socind/education.htm'
