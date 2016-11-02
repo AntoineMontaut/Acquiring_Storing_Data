@@ -39,7 +39,8 @@ def explore_soup(soup):
         print cols
         for col in cols:
             content.append(col.find(text=True))
-        print('Country: {0}, year: {1}, total: {2}, men: {3}, women: {4}'.format(content[0], content[1], content[-3], content[-2], content[-1]))
+        print('Country: {0}, year: {1}, total: {2}, men: {3}, women: {4}'.format(
+                 content[0], content[1], content[-3], content[-2], content[-1]))
     
 def create_education_table():
     '''create the weather.db table'''
@@ -102,7 +103,8 @@ def store_to_table(df):
     cur = con.cursor()
     with con:
         cur.executemany('INSERT INTO school_expectancy (country, year, men, women, total) VALUES (?,?,?,?,?);', 
-        ([(df['countries'].loc[i], df['year'].loc[i], df['men'].loc[i], df['women'].loc[i], df['total'].loc[i]) for i in xrange(183)]))
+                                  ([(df['countries'].loc[i], df['year'].loc[i], df['men'].loc[i], df['women'].loc[i], df['total'].loc[i]) 
+                                    for i in xrange(183)]))
         
     con.close()
     print('Data saved to table')
@@ -158,7 +160,7 @@ def compare_sle_gdp(df, df_gdp):
     df['gdp'] = 'NaN'
     for i in xrange(len(df)):
         try:
-            df.gdp.loc[i] = float(df_gdp[df_gdp['Country Name'] == df.Country.loc[i]][str(df.Year.loc[i])].values)
+            df.loc[i, 'gdp'] = float(df_gdp[df_gdp['Country Name'] == df.Country.loc[i]][str(df.Year.loc[i])].values)
         except:
             df.gdp.loc[i] = 'NaN'
     df = df[df.gdp != 'NaN']
@@ -194,7 +196,7 @@ def main():
     df = load_data_from_db()
     # clean_table(con, cur, 'school_expectancy')
     # store_to_table(df)
-    # explore_data(df)
+    explore_data(df)
     df_gdp = load_gdp_data()
     # save_gdp_to_db(df_gdp)
     compare_sle_gdp(df, df_gdp)
